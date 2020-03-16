@@ -16,6 +16,10 @@ phases:
         - sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URI:$TAG"'@' simple_jwt_api.yml
         - $(aws ecr get-login --no-include-email)
         - export KUBECONFIG=$HOME/.kube/config
+        - pip install -r requirements.txt
+        - export TOKEN=`curl -d '{"email":"<EMAIL>","password":"<PASSWORD>"}' -H "Content-Type:application/json" -X POST localhost:8080/auth  | jq -r '.token'`
+        - echo $TOKEN
+        - curl --request GET 'http://127.0.0.1:8080/contents' -H "Authorization:Bearer ${TOKEN}" | jq .
   build:
     commands:
       - docker build --tag $REPOSITORY_URI:$TAG .
